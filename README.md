@@ -17,4 +17,4 @@
 1. Ensure redis is running
 2. python manage.py runserver
 3. Navigate your browser to: http://localhost:8000/thermo/
-4. python manage.py readSensor# iotemp
+4. python manage.py readSensor
