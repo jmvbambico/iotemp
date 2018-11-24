@@ -1,0 +1,64 @@
+{% extends 'thermo/layout.html' %}
+
+{% block content %}{% endblock content %}
+
+{% block script %}
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+<script>
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    var socket = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/thermo/');
+
+    socket.onopen = function open() {
+        console.log("Connecting to socket server...");
+    };
+
+    socket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+
+        if(message == 'accepted') {
+            console.log('Client successfully connected!');
+        }
+        else{
+            readTemp(message);
+        }
+    };
+
+    socket.onclose = function(e) {
+        console.error('Client disconnected...');
+    };
+
+    $(document).ready(function(){
+        var options = {
+            data: [{
+                type: "spline",
+                dataPoints: []
+            }],
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                            second : 'h:mm:ss a'
+                        }
+                    }
+                }]
+            }
+        };
+
+        $("#chartContainer").CanvasJSChart(options);
+    });
+
+    function readTemp(message){
+        var chart = $("#chartContainer").CanvasJSChart();
+        var length = chart.options.data[0].dataPoints.length;
+
+		chart.options.data[0].dataPoints.push({
+            x : new Date(),
+            y : message
+        });
+
+		chart.render();
+    }
+</script>
+{% endblock script %}
